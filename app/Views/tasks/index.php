@@ -86,6 +86,7 @@ Add Task
 <label>Title</label>
 <input type="text" name="title" id="title"
 class="form-control">
+<small class="text-danger error-title"></small>
 </div>
 
 <div class="mb-3">
@@ -93,6 +94,7 @@ class="form-control">
 <textarea name="description"
 id="description"
 class="form-control"></textarea>
+<small class="text-danger error-description"></small>
 </div>
 
 <div class="mb-3">
@@ -105,7 +107,7 @@ class="form-control">
 <option value="Completed">Completed</option>
 
 </select>
-
+<small class="text-danger error-status"></small>
 </div>
 
 <div class="mb-3">
@@ -113,6 +115,7 @@ class="form-control">
 <input type="date" name="due_date"
 id="due_date"
 class="form-control">
+<small class="text-danger error-due_date"></small>
 </div>
 
 </div>
@@ -179,8 +182,11 @@ $('#taskForm').submit(function(e){
     e.preventDefault();
 
     let id = $('#task_id').val();
-
     let url = id ? '/task/update/' + id : '/task/store';
+
+    // Clear old errors
+    $('.text-danger').text('');
+    $('.form-control').removeClass('is-invalid');
 
     $.ajax({
         url: url,
@@ -196,7 +202,18 @@ $('#taskForm').submit(function(e){
 
                 table.ajax.reload();
 
-                alert(response.message ?? 'Success');
+                alert(response.message);
+
+            } else {
+
+                // Show validation errors
+                $.each(response.errors, function(key, value){
+
+                    $('.error-' + key).text(value);
+                    $('#' + key).addClass('is-invalid');
+
+                });
+
             }
         }
     });

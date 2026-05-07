@@ -12,24 +12,36 @@ class TaskController extends BaseController
     }
 
     public function store()
-    {
-        $taskModel = new TaskModel();
+        {
+            $rules = [
+                'title'       => 'required|min_length[3]',
+                'description' => 'required|min_length[5]',
+                'status'      => 'required|in_list[Pending,Completed]',
+                'due_date'    => 'required|valid_date'
+            ];
 
-        $data = [
-            'user_id' => session()->get('user_id'),
-            'title' => $this->request->getPost('title'),
-            'description' => $this->request->getPost('description'),
-            'status' => $this->request->getPost('status'),
-            'due_date' => $this->request->getPost('due_date')
-        ];
+            if (!$this->validate($rules)) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'errors' => $this->validator->getErrors()
+                ]);
+            }
 
-        $taskModel->save($data);
+            $taskModel = new \App\Models\TaskModel();
 
-        return $this->response->setJSON([
-            'status' => true,
-            'message' => 'Task Added'
-        ]);
-    }
+            $taskModel->save([
+                'user_id'     => session()->get('user_id'),
+                'title'       => $this->request->getPost('title'),
+                'description' => $this->request->getPost('description'),
+                'status'      => $this->request->getPost('status'),
+                'due_date'    => $this->request->getPost('due_date')
+            ]);
+
+            return $this->response->setJSON([
+                'status' => true,
+                'message' => 'Task Added Successfully'
+            ]);
+        }
 
     public function edit($id)
     {
